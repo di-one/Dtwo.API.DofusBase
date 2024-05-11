@@ -6,8 +6,8 @@ namespace Dtwo.API.DofusBase
     public class DofusMessageBinding
     {
         [DataMember]
-        public string Identifier { get; set; }
+        public string? Identifier { get; set; }
         [DataMember]
-        public string ClassName { get; set; }
+        public string? ClassName { get; set; }
     }
 }

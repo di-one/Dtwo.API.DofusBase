@@ -5,7 +5,10 @@ namespace Dtwo.API.DofusBase.Reflection
     public abstract class MessagesLoader<T> where T : DofusMessage
     {
         protected IDictionary<string, Func<T>> Messages => m_messages;
-        private readonly Dictionary<string, Func<T>> m_messages = new();
+        private readonly Dictionary<string, Func<T>> m_messages = new(); // by id
+        private readonly Dictionary<string, string> m_messagesByType = new(); // by type
+
+        public IReadOnlyDictionary<string, string> MessagesByType => m_messagesByType;
 
         protected abstract Assembly m_assembly { get; }
 
@@ -18,14 +21,20 @@ namespace Dtwo.API.DofusBase.Reflection
             }
 
             string content = File.ReadAllText(filePath);
-            List<DofusMessageBinding> bindings;
+            List<DofusMessageBinding>? bindings;
             try
             {
-                bindings = Json.JSonSerializer<List<DofusMessageBinding>>.DeSerialize(content);
+                bindings = Newtonsoft.Json.JsonConvert.DeserializeObject<List<DofusMessageBinding>>(content);
             }
             catch (Exception ex)
             {
                 LogManager.LogError(ex.ToString());
+                return false;
+            }
+
+            if (bindings == null)
+            {
+                LogManager.LogError($"Error on Initialize messages : bindings is null", 1);
                 return false;
             }
 
@@ -38,22 +47,27 @@ namespace Dtwo.API.DofusBase.Reflection
                 {
                     var binding = GetBinding(type, bindings);
 
-                    if (binding == null) continue;
+                    if (binding == null || binding.Identifier == null) continue;
 
                     if (m_messages.ContainsKey(binding.Identifier)) // error
                     {
-                        LogManager.LogWarning($"Error on MessageLoader.LoadMessage : The key {binding.Identifier} aleady exist");
+                        LogManager.LogWarning(
+                            $"{nameof(MessagesLoader<T>)}.{nameof(InitializeMessages)}", 
+                            $"Error on MessageLoader.LoadMessage : The key {binding.Identifier} aleady exist");
                         continue;
                     }
 
                     ConstructorInfo? ctor = type.GetConstructor(Type.EmptyTypes);
                     if (ctor == null)
                     {
-                        LogManager.LogWarning($"Error on MessageLoader.LoadMessage : The key {binding.Identifier} has no constructor");
+                        LogManager.LogWarning(
+                            $"{nameof(MessagesLoader<T>)}.{nameof(InitializeMessages)}", 
+                            $"Error on MessageLoader.LoadMessage : The key {binding.Identifier} has no constructor");
                         continue;
                     }
 
                     m_messages.Add(binding.Identifier, ctor.CreateDelegate<Func<T>>());
+                    m_messagesByType.Add(type.Name, binding.Identifier);
                 }
             }
 

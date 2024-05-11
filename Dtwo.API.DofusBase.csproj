@@ -1,14 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dtwo.API\Dtwo.API.csproj" />
-    <ProjectReference Include="..\Dtwo.Json\Dtwo.Json.csproj" />
+    <ProjectReference Include="..\Dtwo.Plugins\Dtwo.Plugins.csproj" />
   </ItemGroup>
 
 </Project>

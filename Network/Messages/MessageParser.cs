@@ -9,6 +9,6 @@ namespace Dtwo.API.DofusBase.Network.Messages
     public abstract class MessageParser
     {
         public abstract void OnGetPacket(byte[] data, int length);
-        public Action<string, DofusMessage> OnGetMessage;
+        public Action<string, DofusMessage>? OnGetMessage;
     }
 }
